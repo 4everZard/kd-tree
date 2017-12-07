@@ -1,8 +1,12 @@
-import java.awt.geom.Point2D;
+import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdDraw;
 import java.util.ArrayList;
 import java.util.Set;
+
+import edu.princeton.cs.algs4.SET;
 public class PointSET {
-	private Set<Point2D> points;
+	private SET<Point2D> points;
 	public PointSET() {
 		points = new SET<Point2D>();
 	}
@@ -27,7 +31,7 @@ public class PointSET {
 		ArrayList<Point2D> inRange = new ArrayList<Point2D>();
 		for(Point2D p: points) {
 			if(rect.contains(p)) {
-				inRange.add(p)				
+				inRange.add(p);			
 			}		
 		}
 		return inRange;

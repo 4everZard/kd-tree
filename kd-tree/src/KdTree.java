@@ -1,5 +1,10 @@
 import java.util.Comparator;
+import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.StdDraw;
 import java.util.ArrayList;
+import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
+
 
 public class KdTree {
 	// constructor
@@ -15,6 +20,10 @@ public class KdTree {
 	public int size() {
 		return size;
 	}
+	
+	public boolean isEmpty() {
+        return root == null;
+    }
 	
 	//create private static node class
 	private static class Node{
@@ -86,7 +95,7 @@ public class KdTree {
 					RectHV rect = null;
 					// if current node is vertical type, point to left rectangle, else point to bottom
 					if(currNode.vertical()) {
-						rect = new RectHV(currNode.getRect().xmin(), currNode.getRect().ymin(), currNode.getPoint().x(), currNode.getRect().ymax())
+						rect = new RectHV(currNode.getRect().xmin(), currNode.getRect().ymin(), currNode.getPoint().x(), currNode.getRect().ymax());
 					}
 					else {
 						rect = new RectHV(currNode.getRect().xmin(), currNode.getRect().ymin(), currNode.getRect().xmax(), currNode.getPoint().y());
@@ -245,48 +254,90 @@ public class KdTree {
 				else return 0;
 			}
 			
-		}
+		};
 	}
 	
+	public Point2D nearest(Point2D p) {
+		if(size == 0)
+			return null;
+		MinPQ<Point2D> minPQ = new MinPQ<Point2D>(distanceOrder(p));
+		nearestRecursive(minPQ, root, p, new RectHV(0.0, 0.0, 1.0, 1.0));
+		return minPQ.min();
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+    private void nearestRecursive(MinPQ<Point2D> m, Node n, Point2D p, RectHV rect)
+    {
+        if (n == null)
+            return;
+        
+        Point2D nPoint = n.getPoint();
+        m.insert(nPoint);
+        //  this is so that it doesnt make too much calls to  methods of Point2D and RectHV
+        double rectXmin = rect.xmin();
+        double rectXmax = rect.xmax();
+        double rectYmin = rect.ymin();
+        double rectYmax = rect.ymax();
+        double pointx = nPoint.x();
+        double pointy = nPoint.y();
+        
+        if (n.vertical())
+        {
+           RectHV leftRect = new RectHV(rectXmin, rectYmin,
+                   pointx, rectYmax);
+           RectHV rightRect = new RectHV(pointx, rectYmin,
+                   rectXmax, rectYmax);
+
+
+            if (p.x() < pointx)
+            {
+                nearestRecursive(m, n.getLeft(), p, leftRect);
+                double distanceToNearest = m.min().distanceSquaredTo(p);
+                double distanceToRect = rightRect.distanceSquaredTo(p);
+                if (distanceToRect < distanceToNearest) 
+                {
+                    nearestRecursive(m, n.getRight(), p, rightRect);
+                }
+            }
+            else
+            {
+                nearestRecursive(m, n.getRight(), p, rightRect);
+                double distanceToNearest = m.min().distanceSquaredTo(p);
+                double distanceToRect = leftRect.distanceSquaredTo(p);
+                if (distanceToRect < distanceToNearest) 
+                {
+                    nearestRecursive(m, n.getLeft(), p, leftRect);
+                }
+            }
+        }
+        else
+        {
+            //  for horizontal lines
+            
+            RectHV bottomRect = new RectHV(rectXmin, rectYmin, rectXmax, pointy);
+            RectHV topRect = new RectHV(rectXmin, pointy, rectXmax, rectYmax);
+            //  if point lies below the horizonal line of current search point
+            if (p.y() < pointy)
+            {
+                nearestRecursive(m, n.getLeft(), p, bottomRect);
+                double distanceToNearest = m.min().distanceSquaredTo(p);
+                double distanceToRect = topRect.distanceSquaredTo(p);
+                if (distanceToRect < distanceToNearest)
+                {
+                    nearestRecursive(m, n.getRight(), p, topRect);
+                }
+            }
+            else
+            {
+                nearestRecursive(m, n.getRight(), p, topRect);
+                double distanceToNearest = m.min().distanceSquaredTo(p);
+                double distanceToRect = bottomRect.distanceSquaredTo(p);
+                if (distanceToRect < distanceToNearest)
+                {
+                    nearestRecursive(m, n.getLeft(), p, bottomRect);
+                }
+            }
+        }
+    }
 	
 	
 	
